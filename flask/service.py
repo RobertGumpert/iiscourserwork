@@ -69,9 +69,12 @@ def create_data_frames():
 
 
 def find_data_files():
-    global map_year_and_file_path, map_year_and_data_frame
-    root_py = os.path.dirname(os.path.abspath(__file__)).split('\\flask')[0]
-    for dir_obj in os.walk(root_py):
+    global map_year_and_file_path, map_year_and_data_frame, tg_configs
+    root_py = os.path.dirname(os.path.abspath(__file__))
+    tg_configs = configparser.ConfigParser()
+    tg_configs.read('configs.ini')
+    project_dir = root_py.split('\\flask')[0]
+    for dir_obj in os.walk(project_dir):
         dir_path = str(dir_obj[0])
         if 'data' and 'input' in dir_path:
             print(dir_path)
