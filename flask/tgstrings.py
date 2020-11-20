@@ -90,26 +90,63 @@ def predict_classification(split_message):
     if 'по регионам' in split_args[0]:
         scope = 'region'
         region = split_args[0].split('-')[1]
-        response = service.predict_classification_region(
+        info = service.predict_classification_region(
             region=region,
             x_predict_features=x_predict_features,
             y_feature_name=y_feature_name
         )
+        response = ''
+        if info['predict_class'] == info['classes'][0]:
+            response += f'\nВам подойдёт : {info["predict"][-1]["Country"]}\n'
+        if info['predict_class'] == info['classes'][-1]:
+            response += f'\nВам подойдёт : {info["predict"][0]["Country"]}\n'
+        response += f'{region}: {info["class"]}' + \
+                    f'\nНаиболее значимо для счастья {info["most_importance"]["feature_name"]},' + \
+                    f'со значимостью {str(int(info["most_importance"]["feature_importance"] * 100))}% \nОстальные параметры:'
+        other = ''
+        for k, v in info["statistics"].items():
+            other += f'\n*\nПараметр {k} со значимостью {str(int(v["feature_importance"] * 100))}%\n' + \
+                     f'Маск: {str(int(v["feature_max"]))}%, Мин: {str(int(v["feature_min"]))}%, Изменяется на: {str(int(v["feature_dispersion"]))}%'
+        response += other
         return response
     if 'по миру' in split_args[0]:
         scope = 'world'
-        response = service.predict_classification_world(
+        info = service.predict_classification_world(
             x_predict_features=x_predict_features,
             y_feature_name=y_feature_name
         )
+        response = ''
+        if info['predict_class'] == info['classes'][0]:
+            response += f'\nВам подойдёт : {info["predict"][-1]["Country"]}\n'
+        if info['predict_class'] == info['classes'][1]:
+            response += f'\nВам подойдёт : {info["predict"][int(len(info["predict"]) / 2)]["Country"]}\n'
+        if info['predict_class'] == info['classes'][2]:
+            response += f'\nВам подойдёт : {info["predict"][0]["Country"]}\n'
+        response += f'По миру: {info["class"]}' + \
+                    f'\nНаиболее значимо для счастья {info["most_importance"]["feature_name"]},' + \
+                    f'со значимостью {str(int(info["most_importance"]["feature_importance"] * 100))}% \nОстальные параметры:'
+        other = ''
+        for k, v in info["statistics"].items():
+            other += f'\n*\nПараметр {k} со значимостью {str(int(v["feature_importance"] * 100))}%\n' + \
+                     f'Маск: {str(int(v["feature_max"]))}%, Мин: {str(int(v["feature_min"]))}%, Изменяется на: {str(int(v["feature_dispersion"]))}%'
+        response += other
         return response
     if 'по странам' in split_args[0]:
         scope = 'country'
         country = split_args[0].split('-')[1]
-        response = service.predict_classification_country(
+        info = service.predict_classification_country(
             country=country,
             x_predict_features=x_predict_features,
             y_feature_name=y_feature_name
         )
+        response = ''
+        response += f'Страна {country} станет: {info["class"]}' + \
+                    f'\nНаиболее значимо для счастья {info["most_importance"]["feature_name"]},' + \
+                    f'со значимостью {str(int(info["most_importance"]["feature_importance"] * 100))}% \nОстальные параметры:'
+        other = ''
+        for k, v in info["statistics"].items():
+            other += f'\n*\nПараметр {k} со значимостью {str(int(v["feature_importance"] * 100))}%\n' + \
+                     f'Маск: {str(int(v["feature_max"]))}%, Мин: {str(int(v["feature_min"]))}%, Изменяется на: {str(int(v["feature_dispersion"]))}%'
+        response += other
         return response
     return {'error': 'bad params'}

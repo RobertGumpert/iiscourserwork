@@ -21,6 +21,7 @@ def classification_by_column(cl_by_column, map_column_and_rows, value_column, x_
     result['statistics'] = column_report['x_features']
     result['y'] = column_report['y_feature']
     result['classes'] = cl.classes_.tolist()
+    result['predict_class'] = predict_class
     if flag == 'country':
         if predict_class == cl.classes_[0]:
             result['class'] = 'Станет менее счастливой.'
@@ -49,6 +50,7 @@ def classification_by_world(cl_by_world, concat_data_frame, x_predict_values, y_
     cl = cl_by_world['classifier']
     x_predict = pandas.DataFrame([data], columns=x_feature_names)
     predict_class = int(cl.predict(x_predict))
+    result['predict_class'] = predict_class
     if predict_class == cl.classes_[0]:
         result['class'] = 'Наименее счастливые страны в мире.'
     if predict_class == cl.classes_[1]:

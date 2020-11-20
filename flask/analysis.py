@@ -32,12 +32,7 @@ def base_statistics(rows):
 def select_min_max_average(data_series):
     min_value = data_series.min()
     max_value = data_series.max() + 1
-    denominator = 0
-    if (max_value - min_value) == 0:
-        denominator = max_value
-    else:
-        denominator = abs(max_value + 1 - min_value)
-    average_value = int((sum(range(min_value, max_value + 1, 1))) / denominator)
+    average_value = int((sum(data_series.tolist()) / len(data_series.tolist())))
     return min_value, max_value, average_value
 
 
@@ -113,7 +108,7 @@ def classification_by_column(map_column_and_rows, y_feature_name):
         if rows is None:
             continue
         rows_copy = rows.copy()
-        rows_copy.sort_values(by=[y_feature_name])
+        rows_copy = rows_copy.sort_values(by=[y_feature_name])
         x_train_rows = rows_copy.loc[:, x_feature_names]
         rows_copy[y_feature_name] = rows_copy[y_feature_name].astype('int')
         y_train_rows = rows_copy.loc[:, [y_feature_name]]
