@@ -1,8 +1,18 @@
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.cluster import KMeans
 from sklearn.cluster import MeanShift
 import math
 
 x_feature_names = ['GDP', 'Family', 'Health', 'Freedom', 'Corruption']
+
+
+def euclidean_distance(a, b):
+    summary = 0
+    for i in range(len(a)):
+        difference = a[i] - b[i]
+        power = pow(difference, 2)
+        summary += power
+    return summary ** (1 / float(2))
 
 
 def base_statistics(rows):
@@ -102,8 +112,8 @@ def classification_report(classifier, x_train_rows, y_train_rows, y_feature_name
 
 
 def classification_by_column(map_column_and_rows, y_feature_name):
-    print('\n(BY COLUMN) Y feature name : ', y_feature_name, '\n')
-    classification_map = dict()
+    # print('\n(BY COLUMN) Y feature name : ', y_feature_name, '\n')
+    report = dict()
     for value_column, rows in map_column_and_rows.items():
         if rows is None:
             continue
@@ -122,24 +132,24 @@ def classification_by_column(map_column_and_rows, y_feature_name):
             y_train_rows=y_train_rows,
             y_feature_name=y_feature_name
         )
-        classification_map[value_column] = report
+        report[value_column] = report
 
-    for key, val in classification_map.items():
-        print('\tColumn value : ', key)
-        print('\t\tMost importance : ')
-        for k, v in val['most_importance'].items():
-            print('\t\t\t', k, ' = ', v)
-        print('\t\tImportance : ')
-        for k, v in val['x_features'].items():
-            print('\t\t\t', k, ' = ', v)
-        print('\t\tY feature statistics : ')
-        for k, v in val['y_feature'].items():
-            print('\t\t\t', k, ' = ', v)
-    return classification_map
+    # for key, val in report.items():
+    #     print('\tColumn value : ', key)
+    #     print('\t\tMost importance : ')
+    #     for k, v in val['most_importance'].items():
+    #         print('\t\t\t', k, ' = ', v)
+    #     print('\t\tImportance : ')
+    #     for k, v in val['x_features'].items():
+    #         print('\t\t\t', k, ' = ', v)
+    #     print('\t\tY feature statistics : ')
+    #     for k, v in val['y_feature'].items():
+    #         print('\t\t\t', k, ' = ', v)
+    return report
 
 
 def classification_by_world(concat_data_frame, y_feature_name):
-    print('\n(BY WORLD) Y feature name : ', y_feature_name, '\n')
+    # print('\n(BY WORLD) Y feature name : ', y_feature_name, '\n')
     concat_copy = concat_data_frame.copy()
     concat_copy.sort_values(by=[y_feature_name])
     x_train_rows = concat_copy.loc[:, x_feature_names]
@@ -153,13 +163,51 @@ def classification_by_world(concat_data_frame, y_feature_name):
         y_train_rows=y_train_rows,
         y_feature_name=y_feature_name
     )
-    print('\t\tMost importance : ')
-    for k, v in report['most_importance'].items():
-        print('\t\t\t', k, ' = ', v)
-    print('\t\tImportance : ')
-    for k, v in report['x_features'].items():
-        print('\t\t\t', k, ' = ', v)
-    print('\t\tY feature statistics : ')
-    for k, v in report['y_feature'].items():
-        print('\t\t\t', k, ' = ', v)
+    # print('\t\tMost importance : ')
+    # for k, v in report['most_importance'].items():
+    #     print('\t\t\t', k, ' = ', v)
+    # print('\t\tImportance : ')
+    # for k, v in report['x_features'].items():
+    #     print('\t\t\t', k, ' = ', v)
+    # print('\t\tY feature statistics : ')
+    # for k, v in report['y_feature'].items():
+    #     print('\t\t\t', k, ' = ', v)
+    return report
+
+
+def clustering_kmeans(concat_data_frame):
+    concat_copy = concat_data_frame.copy()
+    #
+    x_train_rows = concat_copy.loc[:, x_feature_names]
+    kmeans = KMeans(n_clusters=3)
+    kmeans.fit(x_train_rows)
+    concat_copy = concat_copy.loc[concat_copy['Year'] == 2019]
+    #
+    countries_in_cluster = dict()
+    for i, _ in enumerate(kmeans.cluster_centers_):
+        countries_in_cluster[i] = list()
+    #
+    countries = dict()
+    for row in concat_copy.iterrows():
+        distances = list()
+        features = row[1].loc[x_feature_names]
+        features = features.tolist()
+        for i, _ in enumerate(kmeans.cluster_centers_):
+            distance = euclidean_distance(kmeans.cluster_centers_[i], features)
+            distances.insert(i, distance)
+        countries[row[1]['Country']] = distances
+    #
+    for country, distances in countries.items():
+        min_index = min(range(len(distances)), key=distances.__getitem__)
+        countries_in_cluster[min_index].append(dict(
+            country=country,
+            distance=distances[min_index]
+        ))
+    #
+    report = dict(
+        clucterizator=kmeans,
+        centers=kmeans.cluster_centers_,
+        countries=countries_in_cluster
+    )
+    #
     return report

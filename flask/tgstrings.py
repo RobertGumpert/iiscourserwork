@@ -150,3 +150,16 @@ def predict_classification(split_message):
         response += other
         return response
     return {'error': 'bad params'}
+
+
+# Команды:
+#   Кластеризация, предсказать:
+#       Мне повезет: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0
+#
+def predict_kmeans(split_message):
+    x_predict_features = get_x_predict_features(split_message[1])
+    info = service.predict_kmeans(x_predict_features=x_predict_features)
+    response = f'Вам подойдёт страна {info["country"]}\nТакже возможно подойдут:\n'
+    for country in info['similar']:
+        response += f'* {country}\n'
+    return response

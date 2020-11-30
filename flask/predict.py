@@ -1,3 +1,5 @@
+from random import randrange
+
 import pandas
 import statistics
 
@@ -66,4 +68,25 @@ def classification_by_world(cl_by_world, concat_data_frame, x_predict_values, y_
     result['statistics'] = cl_by_world['x_features']
     result['y'] = cl_by_world['y_feature']
     result['predict'] = predict_samples[['Country', 'Region', y_feature_name]].to_dict('records')
+    return result
+
+
+def clustering_kmeans(kmeans_clustering, x_predict_values):
+    data = []
+    result = dict()
+    for column, value in x_predict_values.items():
+        if column not in x_feature_names:
+            return None
+        data.append(value)
+    kmeans = kmeans_clustering['clucterizator']
+    x_predict = pandas.DataFrame([data], columns=x_feature_names)
+    cluster = kmeans.predict(x_predict)[0]
+    cluster_countries = kmeans_clustering['countries'][cluster]
+    country_index = randrange(len(cluster_countries))
+    result['country'] = cluster_countries[country_index]['country']
+    similar = list()
+    for _ in range(0, 5):
+        similar_country = randrange(len(cluster_countries))
+        similar.append(cluster_countries[similar_country]['country'])
+    result['similar'] = similar
     return result

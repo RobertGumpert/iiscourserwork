@@ -56,6 +56,9 @@ def parse_message(message):
     if split_message[0] == 'Предсказать по авторской оценке':
         response = tgstrings.predict_classification(split_message=split_message)
         return response
+    if split_message[0] == 'Мне повезет':
+        response = tgstrings.predict_kmeans(split_message=split_message)
+        return response
     return response
 
 
