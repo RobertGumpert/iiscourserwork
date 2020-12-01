@@ -163,3 +163,23 @@ def predict_kmeans(split_message):
     for country in info['similar']:
         response += f'* {country}\n'
     return response
+
+
+# Команды:
+#   Предсказать:
+#       Я буду счастлив: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0
+#
+def predict_happiness_models(split_message):
+    response = ""
+    x_predict_features = get_x_predict_features(split_message[1])
+    info = service.predict_happiness_models(x_predict_features)
+    pr_score = "ДА!"
+    if info["pr_score"][0] == 0:
+        pr_score = "НЕТ!"
+    response += f'Грубый Робот Петя, максималист ответит что : {pr_score}\n'
+    response += f'Однако, более расчетливый Робот Вася, ответит что на : {info["lr_score"][0]}%\n'
+    response += 'Оба такие разные, но сходятся в одном: \n'
+    for feature in info["importance"]:
+        response += f'* {feature}\n'
+    response += 'все это сильнее влияет на счастье!'
+    return response

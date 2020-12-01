@@ -49,8 +49,52 @@ app = Flask(__name__)
 
 def parse_message(message):
     response = {'error': 'bad params'}
+    if message == "/start" or message == "/help":
+        return "Что умеет чат бот?\n" \
+               "1) Рассказывать тебе что важнее всего для счастья.\n" \
+               "   По уровню:\n" \
+               "   - в регионе мира\n" \
+               "   - в стране\n" \
+               "   - в мире\n" \
+               "   Счастья измеряется по рангу страны в мире и по оценке жителей\n" \
+               "   Если ты хочешь узнать, то вводи подобные команды:\n" \
+               "   - Анализ: по регионам-Western Europe, оценка жителями\n" \
+               "   - Анализ: по регионам-Western Europe, ранг\n" \
+               "   - Анализ: по странам-Russia, оценка жителями\n" \
+               "   - Анализ: по странам-Russia, ранг\n" \
+               "   - Анализ: по миру, оценка жителями\n" \
+               "   - Анализ: по миру, ранг\n" \
+               "2) Автор долго изучал как живут люди в странах,\n" \
+               "   поэтому ты можешь угадать в какой стране тебе\n" \
+               "   лучше жить по мнению автора.\n" \
+               "   Для этого введи сначала 'Предсказать по авторской оценке:',\n" \
+               "   укажи уровень:\n"\
+               "   - в регионе мира\n" \
+               "   - в мире\n" \
+               "   затем укажи насколько для тебя важные такие параметры (0-100):\n" \
+               "   - ВВП: GDP\n" \
+               "   - Семья: Family\n" \
+               "   - Здравооранение: Health\n" \
+               "   - Свобода: Freedom\n" \
+               "   - Доверие к государ.: Corruption\n" \
+               "   В итоге должен получить примерно такую комманду:\n" \
+               "   - Предсказать по авторской оценке: по регионам-Western Europe, оценка жителями,\n" \
+               "     GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
+               "   С этим пуунктом еще не все!\n" \
+               "   Указав уровень 'по странам-', и указав страну, ты можешь\n" \
+               "   угадать, станет ли жить страна счастливее,\n" \
+               "   если ты указал такие параметры\n" \
+               "   - Предсказать по авторской оценке: по странам-Russia, ранг,\n" \
+               "     GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
+               "3)Плевать на статистику счастья?\n" \
+               "   Вводи и не прогадаешь в какой стране тебе жить:\n" \
+               "   - Мне повезет: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
+               "4)Плевать даже на страну? Просто хочешь узнать будешь ли счастлив?\n" \
+               "   Вводи:\n" \
+               "   - Я буду счастлив: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n"
+
     split_message = message.split(':')
-    if split_message[0] == 'Авторская оценка, анализ':
+    if split_message[0] == 'Анализ':
         response = tgstrings.info_classification(split_message=split_message)
         return response
     if split_message[0] == 'Предсказать по авторской оценке':
@@ -58,6 +102,10 @@ def parse_message(message):
         return response
     if split_message[0] == 'Мне повезет':
         response = tgstrings.predict_kmeans(split_message=split_message)
+        return response
+    # Я буду счастлив
+    if split_message[0] == 'Я буду счастлив':
+        response = tgstrings.predict_happiness_models(split_message=split_message)
         return response
     return response
 

@@ -46,6 +46,9 @@ cl_country_score, mi_country_score = dict(), dict()
 #
 kmeans_clustering = dict()
 
+#
+hp_models = dict()
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 
@@ -103,23 +106,23 @@ def init():
         mi_country_rank, \
         cl_country_score, \
         mi_country_score, \
-        kmeans_clustering
+        kmeans_clustering, \
+        hp_models
     #
     find_data_files()
     create_data_frames()
 
-    # cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
-    # cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
-    #
-    # cl_world_rank = analysis.classification_by_world(concat_data_frame, 'Rank')
-    # cl_world_score = analysis.classification_by_world(concat_data_frame, 'Score')
-    #
-    # cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
-    # cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
-    #
-    # kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
+    cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
+    cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
 
-    analysis.happiness_models(concat_data_frame)
+    cl_world_rank = analysis.classification_by_world(concat_data_frame, 'Rank')
+    cl_world_score = analysis.classification_by_world(concat_data_frame, 'Score')
+
+    cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
+    cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
+
+    kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
+    hp_models = analysis.happiness_models(concat_data_frame)
     return
 
 
@@ -228,6 +231,14 @@ def predict_classification_world(x_predict_features, y_feature_name):
 def predict_kmeans(x_predict_features):
     response = predict.clustering_kmeans(
         kmeans_clustering=kmeans_clustering,
+        x_predict_values=x_predict_features
+    )
+    return response
+
+
+def predict_happiness_models(x_predict_features):
+    response = predict.happiness_models(
+        hp_models=hp_models,
         x_predict_values=x_predict_features
     )
     return response

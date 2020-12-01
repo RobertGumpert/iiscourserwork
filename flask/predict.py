@@ -90,3 +90,17 @@ def clustering_kmeans(kmeans_clustering, x_predict_values):
         similar.append(cluster_countries[similar_country]['country'])
     result['similar'] = similar
     return result
+
+
+def happiness_models(hp_models, x_predict_values):
+    result = dict()
+    data = []
+    for column, value in x_predict_values.items():
+        if column in hp_models["importance"]:
+            data.append(value)
+    lr_score = hp_models["lr"].predict([data])
+    pr_score = hp_models["pr"].predict([data])
+    result['lr_score'] = lr_score
+    result['pr_score'] = pr_score
+    result['importance'] = hp_models["importance"]
+    return result
