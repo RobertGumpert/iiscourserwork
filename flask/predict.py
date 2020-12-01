@@ -32,11 +32,9 @@ def classification_by_column(cl_by_column, map_column_and_rows, value_column, x_
     if flag == 'region':
         if predict_class == cl.classes_[0]:
             result['class'] = 'Наименее счастливые страны в регионе.'
-        else:
+        if predict_class == cl.classes_[1]:
             result['class'] = 'Наиболее счастливые страны в регионе.'
-        predict_samples = map_column_and_rows[value_column].loc[
-            (map_column_and_rows[value_column]['Year'] == 2019)
-        ]
+        predict_samples = map_column_and_rows[value_column]
         predict_samples = predict_samples.drop_duplicates(subset='Country')
         result['predict'] = predict_samples[['Country', 'Region', y_feature_name]].to_dict('records')
     return result

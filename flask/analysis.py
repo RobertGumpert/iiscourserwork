@@ -131,13 +131,13 @@ def classification_by_column(map_column_and_rows, y_feature_name):
             continue
         y_train_list = select_two_classes(rows_copy[y_feature_name])
         tree_classifier = classification(x_train_rows, y_train_list)
-        report = classification_report(
+        cl_report = classification_report(
             classifier=tree_classifier,
             x_train_rows=x_train_rows,
             y_train_rows=y_train_rows,
             y_feature_name=y_feature_name
         )
-        report[value_column] = report
+        report[value_column] = cl_report
 
     # for key, val in report.items():
     #     print('\tColumn value : ', key)
