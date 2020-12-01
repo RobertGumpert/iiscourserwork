@@ -108,16 +108,18 @@ def init():
     find_data_files()
     create_data_frames()
 
-    cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
-    cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
+    # cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
+    # cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
+    #
+    # cl_world_rank = analysis.classification_by_world(concat_data_frame, 'Rank')
+    # cl_world_score = analysis.classification_by_world(concat_data_frame, 'Score')
+    #
+    # cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
+    # cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
+    #
+    # kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
 
-    cl_world_rank = analysis.classification_by_world(concat_data_frame, 'Rank')
-    cl_world_score = analysis.classification_by_world(concat_data_frame, 'Score')
-
-    cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
-    cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
-
-    kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
+    analysis.happiness_models(concat_data_frame)
     return
 
 
