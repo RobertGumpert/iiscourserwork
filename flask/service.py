@@ -4,10 +4,13 @@ import analysis
 import pandas
 import predict
 import configparser
+from fpdf import FPDF
 
 # --Tg Bot Configs------------------------------------------------------------------------------------------------------
 
 tg_configs = None
+
+root_py = None
 
 # --Агрегированные данные-----------------------------------------------------------------------------------------------
 
@@ -76,7 +79,7 @@ def create_data_frames():
 
 
 def find_data_files():
-    global map_year_and_file_path, map_year_and_data_frame, tg_configs
+    global map_year_and_file_path, map_year_and_data_frame, tg_configs, root_py
     root_py = os.path.dirname(os.path.abspath(__file__))
     tg_configs = configparser.ConfigParser()
     tg_configs.read('configs.ini')
@@ -112,17 +115,79 @@ def init():
     find_data_files()
     create_data_frames()
 
-    cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
-    cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
-
+    # cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
+    # cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
+    #
     cl_world_rank = analysis.classification_by_world(concat_data_frame, 'Rank')
     cl_world_score = analysis.classification_by_world(concat_data_frame, 'Score')
+    #
+    # cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
+    # cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
+    #
+    # kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
+    # hp_models = analysis.happiness_models(concat_data_frame)
 
-    cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
-    cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
+    create_pdf()
+    return
 
-    kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
-    hp_models = analysis.happiness_models(concat_data_frame)
+
+def create_pdf():
+    pdf = FPDF()
+    pdf.set_font("Arial", size=9)
+    col_width = pdf.w / 6
+    row_height = pdf.font_size * 2
+    #
+    pdf.add_page()
+
+    def print_classification(cl, y):
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, txt="Parameter " + y + ".", ln=1, align="C")
+        pdf.set_font("Arial", size=9)
+        pdf.cell(0, 10, txt="Most importance feature is " + cl['most_importance']['feature_name'] +
+                            " with importance equal " + str(
+            round((cl['most_importance']['feature_importance'] * 100), 2)) + "%",
+                 ln=1)
+        #
+        pdf.cell(0, 10, txt="Statistic of feature " + y,
+                 ln=1)
+        ks = cl['y_feature'].keys()
+        for k in ks:
+            if k != "feature_importance":
+                pdf.cell(col_width, row_height * 1,
+                         txt=k, border=1)
+        pdf.ln(row_height * 1)
+        for key, val in cl['y_feature'].items():
+            if key != "feature_importance":
+                pdf.cell(col_width, row_height * 1,
+                         txt=str(val), border=1)
+
+        pdf.ln(row_height * 1)
+        #
+        pdf.cell(0, 10, txt="Statistics of the significance of each of the parameters",
+                 ln=1)
+        for key, val in cl['x_features'].items():
+            pdf.cell(col_width, row_height * 1, txt="Feature : " + key, ln=1)
+            ks = val.keys()
+            for k in ks:
+                pdf.cell(col_width, row_height * 1,
+                         txt=k, border=1)
+            pdf.ln(row_height * 1)
+            for k, v in val.items():
+                if k == "feature_importance":
+                    pdf.cell(col_width, row_height * 1,
+                             txt=str(round((v * 100), 2)) + "%", border=1)
+                else:
+                    pdf.cell(col_width, row_height * 1,
+                             txt=str(v), border=1)
+            pdf.ln(row_height * 1)
+
+    #
+    pdf.set_font("Arial", size=12)
+    pdf.cell(0, 10, txt="Classification by world.", ln=1, align="C")
+    print_classification(cl_world_rank, 'Rank')
+    print_classification(cl_world_score, 'Score')
+    #
+    pdf.output(root_py + '\\reports\\report.pdf')
     return
 
 
