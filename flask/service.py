@@ -5,6 +5,7 @@ import pandas
 import predict
 import configparser
 from fpdf import FPDF
+import matplotlib.pyplot as plt
 
 # --Tg Bot Configs------------------------------------------------------------------------------------------------------
 
@@ -115,17 +116,17 @@ def init():
     find_data_files()
     create_data_frames()
 
-    # cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
-    # cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
+    cl_region_rank = analysis.classification_by_column(map_region_and_rows, 'Rank')
+    cl_region_score = analysis.classification_by_column(map_region_and_rows, 'Score')
     #
     cl_world_rank = analysis.classification_by_world(concat_data_frame, 'Rank')
     cl_world_score = analysis.classification_by_world(concat_data_frame, 'Score')
     #
-    # cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
-    # cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
+    cl_country_rank = analysis.classification_by_column(map_country_and_rows, 'Rank')
+    cl_country_score = analysis.classification_by_column(map_country_and_rows, 'Score')
     #
-    # kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
-    # hp_models = analysis.happiness_models(concat_data_frame)
+    kmeans_clustering = analysis.clustering_kmeans(concat_data_frame)
+    hp_models = analysis.happiness_models(concat_data_frame)
 
     create_pdf()
     return
@@ -139,7 +140,10 @@ def create_pdf():
     #
     pdf.add_page()
 
-    def print_classification(cl, y):
+    def print_classification(image_filename_head, cl, y):
+        image_filename_head = image_filename_head + '_' + y + '.png'
+        filename = root_py + '\\reports\\plots\\' + image_filename_head.lower()
+        #
         pdf.set_font("Arial", size=12)
         pdf.cell(0, 10, txt="Parameter " + y + ".", ln=1, align="C")
         pdf.set_font("Arial", size=9)
@@ -165,6 +169,8 @@ def create_pdf():
         #
         pdf.cell(0, 10, txt="Statistics of the significance of each of the parameters",
                  ln=1)
+        x = cl['x_features'].keys()
+        y = [val["feature_importance"] for _, val in cl['x_features'].items()]
         for key, val in cl['x_features'].items():
             pdf.cell(col_width, row_height * 1, txt="Feature : " + key, ln=1)
             ks = val.keys()
@@ -178,14 +184,69 @@ def create_pdf():
                              txt=str(round((v * 100), 2)) + "%", border=1)
                 else:
                     pdf.cell(col_width, row_height * 1,
-                             txt=str(v), border=1)
+                             txt=str(round(v, 2)) + "%", border=1)
             pdf.ln(row_height * 1)
+        # fig = plt.figure()
+        # ax = fig.add_axes([0, 0, 1, 1])
+        # ax.set_ylim([0.0, 100.0])
+        # ax.bar(x, y)
+        # fig.show()
+        # fig.savefig(filename)
+        # pdf.image(filename, x=10, y=8, w=100)
+        pdf.add_page()
 
     #
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("Arial", size=18)
     pdf.cell(0, 10, txt="Classification by world.", ln=1, align="C")
-    print_classification(cl_world_rank, 'Rank')
-    print_classification(cl_world_score, 'Score')
+    print_classification('cl_world', cl_world_rank, 'Rank')
+    print_classification('cl_world', cl_world_score, 'Score')
+    #
+    pdf.set_font("Arial", size=18)
+    pdf.cell(0, 10, txt="Classification by regions.", ln=1, align="C")
+    for region, _ in map_region_and_rows.items():
+        if isinstance(region, str):
+            pdf.set_font("Arial", size=16)
+            pdf.cell(0, 10, txt="Statistic of " + region + " region.", ln=1, align="C")
+            print_classification('cl_region_' + region, cl_region_rank[region], 'Rank')
+            print_classification('cl_region_' + region, cl_region_score[region], 'Score')
+    #
+    pdf.set_font("Arial", size=18)
+    pdf.cell(0, 10, txt="Classification by countries.", ln=1, align="C")
+    for country, _ in map_country_and_rows.items():
+        #
+        if isinstance(country, str):
+            pdf.set_font("Arial", size=16)
+            pdf.cell(0, 10, txt="Statistic of " + country + " country.", ln=1, align="C")
+            print_classification('cl_country_' + country, cl_country_rank[country], 'Rank')
+            print_classification('cl_country_' + country, cl_country_score[country], 'Score')
+    #
+    pdf.set_font("Arial", size=18)
+    pdf.cell(0, 10, txt="Clusterization.", ln=1, align="C")
+    pdf.set_font("Arial", size=16)
+    pdf.cell(0, 10, txt="Centers of clusters.", ln=1, align="C")
+    pdf.set_font("Arial", size=9)
+    for cluster, _ in enumerate(kmeans_clustering["centers"]):
+        pdf.cell(0, 10, txt="Cluster number " + str(cluster), ln=1)
+        for x in predict.x_feature_names:
+            pdf.cell(col_width, row_height * 1,
+                     txt=x, border=1)
+        pdf.ln(row_height * 1)
+        for center, _ in enumerate(kmeans_clustering["centers"][cluster]):
+            pdf.cell(col_width, row_height * 1,
+                     txt=str(round(kmeans_clustering["centers"][cluster][center], 2)) + "%", border=1)
+        pdf.ln(row_height * 1)
+    pdf.add_page()
+    pdf.set_font("Arial", size=16)
+    pdf.cell(0, 10, txt="Countries of clusters.", ln=1, align="C")
+    pdf.set_font("Arial", size=9)
+    for cluster, _ in enumerate(kmeans_clustering["countries"]):
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, txt="Cluster number " + str(cluster), ln=1, align="C")
+        pdf.set_font("Arial", size=9)
+        for _, country in enumerate(kmeans_clustering["countries"][cluster]):
+            pdf.cell(0, 10, txt=" - Country: " + country["country"] + " , with distance from center of cluster " + str(
+                round(country["distance"], 2)), ln=1)
+        pdf.add_page()
     #
     pdf.output(root_py + '\\reports\\report.pdf')
     return

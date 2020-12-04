@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, send_file
 from flask import request
 from flask import jsonify
 import requests
@@ -49,6 +49,9 @@ app = Flask(__name__)
 
 def parse_message(message):
     response = {'error': 'bad params'}
+    if message == "/report":
+        domain = str(service.tg_configs['TELEGRAM']['domain']).replace('"', '')
+        return f'{domain}/report/pdf'
     if message == "/start" or message == "/help":
         return "Что умеет чат бот?\n" \
                "1) Рассказывать тебе что важнее всего для счастья.\n" \
@@ -68,7 +71,7 @@ def parse_message(message):
                "   поэтому ты можешь угадать в какой стране тебе\n" \
                "   лучше жить по мнению автора.\n" \
                "   Для этого введи сначала 'Предсказать по авторской оценке:',\n" \
-               "   укажи уровень:\n"\
+               "   укажи уровень:\n" \
                "   - в регионе мира\n" \
                "   - в мире\n" \
                "   затем укажи насколько для тебя важные такие параметры (0-100):\n" \
@@ -131,6 +134,11 @@ def tg_get_web_hook_update():
 
 
 # -API------------------------------------------------------------------------------------------------------------------
+
+@app.route('/report/pdf', methods=['GET'])
+def get_pdf_report():
+    filename = service.root_py + "\\reports\\report.pdf"
+    return send_file(filename, mimetype='application/pdf')
 
 
 @app.route('/info/classification', methods=['GET'])
