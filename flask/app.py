@@ -43,84 +43,115 @@ tg_follow_updates_web_hook()
 
 app = Flask(__name__)
 
+TEXT_FORMAT_RESPONSE, FILE_FORMAT_RESPONSE = 1, 2
+
 
 # -TgBot----------------------------------------------------------------------------------------------------------------
 
 
 def parse_message(message):
-    response = {'error': 'bad params'}
-    if message == "/report":
-        domain = str(service.tg_configs['TELEGRAM']['domain']).replace('"', '')
-        return f'{domain}/report/pdf'
-    if message == "/start" or message == "/help":
-        return "Что умеет чат бот?\n" \
-               "1) Рассказывать тебе что важнее всего для счастья.\n" \
-               "   По уровню:\n" \
-               "   - в регионе мира\n" \
-               "   - в стране\n" \
-               "   - в мире\n" \
-               "   Счастья измеряется по рангу страны в мире и по оценке жителей\n" \
-               "   Если ты хочешь узнать, то вводи подобные команды:\n" \
-               "   - Анализ: по регионам-Western Europe, оценка жителями\n" \
-               "   - Анализ: по регионам-Western Europe, ранг\n" \
-               "   - Анализ: по странам-Russia, оценка жителями\n" \
-               "   - Анализ: по странам-Russia, ранг\n" \
-               "   - Анализ: по миру, оценка жителями\n" \
-               "   - Анализ: по миру, ранг\n" \
-               "2) Автор долго изучал как живут люди в странах,\n" \
-               "   поэтому ты можешь угадать в какой стране тебе\n" \
-               "   лучше жить по мнению автора.\n" \
-               "   Для этого введи сначала 'Предсказать по авторской оценке:',\n" \
-               "   укажи уровень:\n" \
-               "   - в регионе мира\n" \
-               "   - в мире\n" \
-               "   затем укажи насколько для тебя важные такие параметры (0-100):\n" \
-               "   - ВВП: GDP\n" \
-               "   - Семья: Family\n" \
-               "   - Здравооранение: Health\n" \
-               "   - Свобода: Freedom\n" \
-               "   - Доверие к государ.: Corruption\n" \
-               "   В итоге должен получить примерно такую комманду:\n" \
-               "   - Предсказать по авторской оценке: по регионам-Western Europe, оценка жителями,\n" \
-               "     GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
-               "   С этим пуунктом еще не все!\n" \
-               "   Указав уровень 'по странам-', и указав страну, ты можешь\n" \
-               "   угадать, станет ли жить страна счастливее,\n" \
-               "   если ты указал такие параметры\n" \
-               "   - Предсказать по авторской оценке: по странам-Russia, ранг,\n" \
-               "     GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
-               "3)Плевать на статистику счастья?\n" \
-               "   Вводи и не прогадаешь в какой стране тебе жить:\n" \
-               "   - Мне повезет: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
-               "4)Плевать даже на страну? Просто хочешь узнать будешь ли счастлив?\n" \
-               "   Вводи:\n" \
-               "   - Я буду счастлив: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n"
+    try:
+        if message == "/countries":
+            countries = list(service.map_country_and_rows.keys())
+            response = "Вот список стран:\n"
+            for c in countries:
+                response += c + ',\n'
+            return TEXT_FORMAT_RESPONSE, response
+        if message == "/report":
+            domain = str(service.tg_configs['TELEGRAM']['domain']).replace('"', '')
+            return TEXT_FORMAT_RESPONSE, f'{domain}/report/pdf'
+        if message == "/start" or message == "/help":
+            return "Что умеет чат бот?\n" \
+                   "1) Рассказывать тебе что важнее всего для счастья.\n" \
+                   "   По уровню:\n" \
+                   "   - в регионе мира\n" \
+                   "   - в стране\n" \
+                   "   - в мире\n" \
+                   "   Счастья измеряется по рангу страны в мире и по оценке жителей\n" \
+                   "   Если ты хочешь узнать, то вводи подобные команды:\n" \
+                   "   - Анализ: по регионам-Western Europe, оценка жителями\n" \
+                   "   - Анализ: по регионам-Western Europe, ранг\n" \
+                   "   - Анализ: по странам-Russia, оценка жителями\n" \
+                   "   - Анализ: по странам-Russia, ранг\n" \
+                   "   - Анализ: по миру, оценка жителями\n" \
+                   "   - Анализ: по миру, ранг\n" \
+                   "2) Автор долго изучал как живут люди в странах,\n" \
+                   "   поэтому ты можешь угадать в какой стране тебе\n" \
+                   "   лучше жить по мнению автора.\n" \
+                   "   Для этого введи сначала 'Предсказать по авторской оценке:',\n" \
+                   "   укажи уровень:\n" \
+                   "   - в регионе мира\n" \
+                   "   - в мире\n" \
+                   "   затем укажи насколько для тебя важные такие параметры (0-100):\n" \
+                   "   - ВВП: GDP\n" \
+                   "   - Семья: Family\n" \
+                   "   - Здравооранение: Health\n" \
+                   "   - Свобода: Freedom\n" \
+                   "   - Доверие к государ.: Corruption\n" \
+                   "   В итоге должен получить примерно такую комманду:\n" \
+                   "   - Предсказать по авторской оценке: по регионам-Western Europe, оценка жителями,\n" \
+                   "     GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
+                   "   С этим пуунктом еще не все!\n" \
+                   "   Указав уровень 'по странам-', и указав страну, ты можешь\n" \
+                   "   угадать, станет ли жить страна счастливее,\n" \
+                   "   если ты указал такие параметры\n" \
+                   "   - Предсказать по авторской оценке: по странам-Russia, ранг,\n" \
+                   "     GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
+                   "3)Плевать на статистику счастья?\n" \
+                   "   Вводи и не прогадаешь в какой стране тебе жить:\n" \
+                   "   - Мне повезет: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n" \
+                   "4)Плевать даже на страну? Просто хочешь узнать будешь ли счастлив?\n" \
+                   "   Вводи:\n" \
+                   "   - Я буду счастлив: GDP=0;Family=0;Health=0;Freedom=0;Corruption=0\n"
+        split_message = message.split(':')
+        if split_message[0] == 'Анализ':
+            response = tgstrings.info_classification(split_message=split_message)
+            return TEXT_FORMAT_RESPONSE, response
+        if split_message[0] == 'Предсказать по авторской оценке':
+            response = tgstrings.predict_classification(split_message=split_message)
+            return TEXT_FORMAT_RESPONSE, response
+        if split_message[0] == 'Мне повезет':
+            response = tgstrings.predict_kmeans(split_message=split_message)
+            return TEXT_FORMAT_RESPONSE, response
+        if split_message[0] == 'Я буду счастлив':
+            response = tgstrings.predict_happiness_models(split_message=split_message)
+            return TEXT_FORMAT_RESPONSE, response
+        if split_message[0] == 'Найди похожие страны':
+            bts = service.find_similar_country(split_message[1])
+            return FILE_FORMAT_RESPONSE, bts
+    except Exception:
+        return TEXT_FORMAT_RESPONSE, "Упс, кажется что-то не так :("
+    return TEXT_FORMAT_RESPONSE, "Такой команды увы... нет... :("
 
-    split_message = message.split(':')
-    if split_message[0] == 'Анализ':
-        response = tgstrings.info_classification(split_message=split_message)
-        return response
-    if split_message[0] == 'Предсказать по авторской оценке':
-        response = tgstrings.predict_classification(split_message=split_message)
-        return response
-    if split_message[0] == 'Мне повезет':
-        response = tgstrings.predict_kmeans(split_message=split_message)
-        return response
-    # Я буду счастлив
-    if split_message[0] == 'Я буду счастлив':
-        response = tgstrings.predict_happiness_models(split_message=split_message)
-        return response
-    return response
+
+def tg_response_example(chat_id, message):
+    format_response, response = parse_message(message)
+    if format_response is TEXT_FORMAT_RESPONSE:
+        return dict(
+            chat_id=chat_id,
+            text=str(response),
+        ), None
+    if format_response is FILE_FORMAT_RESPONSE:
+        return dict(
+            chat_id=chat_id
+        ), {"document": open('report.pdf', 'rb')}
+    return
 
 
 @app.route('/tg/webhook/update', methods=["GET", "POST"])
 def tg_get_web_hook_update():
-    tg_response_url = get_url('sendMessage')
-    response_data = dict(
+    response_data, f = tg_response_example(
         chat_id=request.json['message']['chat']['id'],
-        text=str(parse_message(request.json['message']['text'])),
+        message=request.json['message']['text']
     )
-    response = requests.post(tg_response_url, data=response_data)
+    response = None
+    if f is None:
+        tg_response_url = get_url('sendMessage')
+        response = requests.post(tg_response_url, data=response_data)
+    else:
+        tg_response_url = get_url('sendDocument')
+        response = requests.post(tg_response_url, data=response_data, files=f)
+        # response = requests.post(tg_response_url, data=response_data)
     if response.status_code != 200:
         print('Error response to client ', request.json['message']['chat']['id'], ' with status :',
               response.status_code, ' and info :', response.json())

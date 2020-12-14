@@ -1,3 +1,4 @@
+import datetime
 import os
 import selector
 import analysis
@@ -129,7 +130,87 @@ def init():
     hp_models = analysis.happiness_models(concat_data_frame)
 
     create_pdf()
+
     return
+
+
+def find_similar_country(country):
+    if country not in map_country_and_rows:
+        raise Exception("This country isn't exist. ")
+    #
+    file_name_rank = os.path.dirname(__file__) + os.path.normpath(f'/reports/plots/{country}_rank.png')
+    file_name_score = os.path.dirname(__file__) + os.path.normpath(f'/reports/plots/{country}_score.png')
+    #
+    if (os.path.isfile(file_name_rank) is False) or (os.path.isfile(file_name_score) is False):
+        print('New graphs')
+        params = map_country_and_rows[country].loc[
+            map_country_and_rows[country]['Year'] == 2019, analysis.x_feature_names].values.tolist()[0]
+        distance_result = dict()
+        life_level = dict()
+        for next_country, df in map_country_and_rows.items():
+            if next_country == country:
+                continue
+            last_year = df.loc[
+                :, ['Year']
+            ].values.tolist()[-1][0]
+            last_year_df = df.loc[
+                df['Year'] == last_year
+            ]
+            next_country_params = last_year_df.loc[
+                :, analysis.x_feature_names].values.tolist()[0]
+            if len(next_country_params) == 0:
+                continue
+            distance = analysis.euclidean_distance(params, next_country_params)
+            distance_result[next_country] = distance
+            life_level[next_country] = dict(
+                rank=last_year_df['Rank'].values.tolist()[0],
+                score=last_year_df['Score'].values.tolist()[0]
+            )
+        distance_result = dict(sorted(distance_result.items(), key=lambda item: item[1]))
+        count = 5
+        i = 0
+        x = list()
+        y = list()
+        for c, d in distance_result.items():
+            if i == count:
+                i = 0
+                break
+            x.append(d)
+            y.append(life_level[c]['score'])
+            plt.annotate(c, (d, life_level[c]['score']))
+            i += 1
+        plt.scatter(x, y)
+        plt.xlabel(f'Насколько страна близка к {country} по ценностям')
+        plt.ylabel('Уровень счастья по мнению жителей')
+        plt.savefig(file_name_score)
+        #
+        plt.clf()
+        y = list()
+        for c, d in distance_result.items():
+            if i == count:
+                i = 0
+                break
+            y.append(life_level[c]['rank'])
+            plt.annotate(c, (d, life_level[c]['rank']))
+            i += 1
+        plt.scatter(x, y)
+        plt.xlabel(f'Насколько страна близка к {country} по ценностям')
+        plt.ylabel('Уровень счастья по рейтингу')
+        plt.savefig(file_name_rank)
+    #
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(0, 10, txt=f"Similar countries for {country}", ln=1, align="C")
+    pdf.set_font("Arial", size=9)
+    pdf.cell(0, 10, txt=f"First graph of similar countries for {country} and param rank", ln=1)
+    pdf.image(file_name_rank, x=50, y=50, w=100)
+    pdf.cell(0, 10, txt=f"Second graph of similar countries for {country} and param score", ln=1)
+    pdf.image(file_name_score, x=50, y=120, w=100)
+    bytes_list = pdf.output(name='report.pdf', dest='S')
+    pdf.output(name='report.pdf')
+    #
+    return bytes_list
 
 
 def create_pdf():

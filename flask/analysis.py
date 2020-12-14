@@ -117,7 +117,6 @@ def classification_report(classifier, x_train_rows, y_train_rows, y_feature_name
 
 
 def classification_by_column(map_column_and_rows, y_feature_name):
-    # print('\n(BY COLUMN) Y feature name : ', y_feature_name, '\n')
     report = dict()
     for value_column, rows in map_column_and_rows.items():
         if rows is None:
@@ -138,23 +137,10 @@ def classification_by_column(map_column_and_rows, y_feature_name):
             y_feature_name=y_feature_name
         )
         report[value_column] = cl_report
-
-    # for key, val in report.items():
-    #     print('\tColumn value : ', key)
-    #     print('\t\tMost importance : ')
-    #     for k, v in val['most_importance'].items():
-    #         print('\t\t\t', k, ' = ', v)
-    #     print('\t\tImportance : ')
-    #     for k, v in val['x_features'].items():
-    #         print('\t\t\t', k, ' = ', v)
-    #     print('\t\tY feature statistics : ')
-    #     for k, v in val['y_feature'].items():
-    #         print('\t\t\t', k, ' = ', v)
     return report
 
 
 def classification_by_world(concat_data_frame, y_feature_name):
-    # print('\n(BY WORLD) Y feature name : ', y_feature_name, '\n')
     concat_copy = concat_data_frame.copy()
     concat_copy.sort_values(by=[y_feature_name])
     x_train_rows = concat_copy.loc[:, x_feature_names]
@@ -168,15 +154,6 @@ def classification_by_world(concat_data_frame, y_feature_name):
         y_train_rows=y_train_rows,
         y_feature_name=y_feature_name
     )
-    # print('\t\tMost importance : ')
-    # for k, v in report['most_importance'].items():
-    #     print('\t\t\t', k, ' = ', v)
-    # print('\t\tImportance : ')
-    # for k, v in report['x_features'].items():
-    #     print('\t\t\t', k, ' = ', v)
-    # print('\t\tY feature statistics : ')
-    # for k, v in report['y_feature'].items():
-    #     print('\t\t\t', k, ' = ', v)
     return report
 
 
@@ -267,7 +244,6 @@ def happiness_models(concat_data_frame):
 
     #
     def regularization_perceptron(train_x, test_x):
-
         def boolean_list(frame_y):
             list_y = [y[0] for y in frame_y]
             aver = float(sum(list_y) / float(len(list_y)))

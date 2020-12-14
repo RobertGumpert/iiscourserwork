@@ -17,12 +17,15 @@ def add_region_if_not_exist(map_year_and_data_frame):
 
 
 def concat(map_year_and_data_frame):
+    if 'concat' in map_year_and_data_frame:
+        return map_year_and_data_frame['concat']
     count = 0
     for year, data_frame in map_year_and_data_frame.items():
         count += len(data_frame.index)
     concat_data_frame = pandas.concat(list(map_year_and_data_frame.values()))
     params = ['GDP', 'Family', 'Health', 'Freedom', 'Corruption']
     max_value = concat_data_frame[params].values.max()
+    s = concat_data_frame.loc[concat_data_frame['Country'] == 'Switzerland']
     for param in params:
         concat_data_frame[param] = [
             (x / max_value) * 100 for x in concat_data_frame[param]
