@@ -158,43 +158,36 @@ def find_similar_country(explored_country):
                               ].values.tolist()[0]
             return last_explored_year, select_data_frame, explored_params
 
-        #
         explored_country_year, explored_country_data_frame, explored_country_params = get_last_year_data(
             data_frame=map_country_and_rows[explored_country]
         )
-        #
         distance_result = dict()
         life_level = dict()
         life_level[explored_country] = dict(
             rank=explored_country_data_frame['Rank'].values.tolist()[0],
             score=explored_country_data_frame['Score'].values.tolist()[0]
         )
-        #
+
         for country, data_frame_country in map_country_and_rows.items():
             if country == explored_country:
                 continue
-            #
             last_year, last_year_data_frame, last_year_params = get_last_year_data(
                 data_frame=map_country_and_rows[country]
             )
-            #
             if len(last_year_params) == 0:
                 continue
-            #
             distance = analysis.euclidean_distance(
                 a=explored_country_params,
                 b=last_year_params
             )
-            #
             distance_result[country] = distance
             life_level[country] = dict(
                 rank=last_year_data_frame['Rank'].values.tolist()[0],
                 score=last_year_data_frame['Score'].values.tolist()[0]
             )
-        #
+
         distance_result = dict(sorted(distance_result.items(), key=lambda item: item[1]))
 
-        #
         def create_plot(deep, feature, file_name, xl, yl):
             i = 0
             x = list()
@@ -223,17 +216,17 @@ def find_similar_country(explored_country):
             deep=deep_search,
             feature='score',
             file_name=file_name_score,
-            xl=f'Насколько страна близка к {explored_country} по ценностям',
+            xl=f'Насколько страна удалена по ценностям от {explored_country}',
             yl='Уровень счастья по мнению жителей'
         )
         create_plot(
             deep=deep_search,
             feature='rank',
             file_name=file_name_rank,
-            xl=f'Насколько страна близка к {explored_country} по ценностям',
+            xl=f'Насколько страна удалена по ценностям от {explored_country}',
             yl='Уровень счастья по рейтингу'
         )
-    #
+
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
@@ -245,7 +238,7 @@ def find_similar_country(explored_country):
     pdf.image(file_name_score, x=50, y=160, w=100)
     bytes_list = pdf.output(name='report.pdf', dest='S')
     pdf.output(name='report.pdf')
-    #
+
     return bytes_list
 
 

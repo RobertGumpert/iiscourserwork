@@ -140,23 +140,27 @@ def tg_response_example(chat_id, message):
 
 @app.route('/tg/webhook/update', methods=["GET", "POST"])
 def tg_get_web_hook_update():
-    response_data, f = tg_response_example(
-        chat_id=request.json['message']['chat']['id'],
-        message=request.json['message']['text']
-    )
-    response = None
-    if f is None:
-        tg_response_url = get_url('sendMessage')
-        response = requests.post(tg_response_url, data=response_data)
-    else:
-        tg_response_url = get_url('sendDocument')
-        response = requests.post(tg_response_url, data=response_data, files=f)
-        # response = requests.post(tg_response_url, data=response_data)
-    if response.status_code != 200:
-        print('Error response to client ', request.json['message']['chat']['id'], ' with status :',
-              response.status_code, ' and info :', response.json())
+    try:
+        response_data, f = tg_response_example(
+            chat_id=request.json['message']['chat']['id'],
+            message=request.json['message']['text']
+        )
+        response = None
+        if f is None:
+            tg_response_url = get_url('sendMessage')
+            response = requests.post(tg_response_url, data=response_data)
+        else:
+            tg_response_url = get_url('sendDocument')
+            response = requests.post(tg_response_url, data=response_data, files=f)
+        if response.status_code != 200:
+            print('Error response to client ', request.json['message']['chat']['id'], ' with status :',
+                  response.status_code, ' and info :', response.json())
+            return {
+                "ok": False
+            }
+    except Exception:
         return {
-            "ok": False
+            "ok": True
         }
     print('OK response to client ', request.json['message']['chat']['id'], ' with status :', response.status_code)
     return {

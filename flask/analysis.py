@@ -1,12 +1,13 @@
-from itertools import chain
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.cluster import KMeans
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import RFE, f_regression
 import math
+from sklearn import tree
+import graphviz
+import pydotplus
 
 x_feature_names = ['GDP', 'Family', 'Health', 'Freedom', 'Corruption']
 
@@ -154,6 +155,16 @@ def classification_by_world(concat_data_frame, y_feature_name):
         y_train_rows=y_train_rows,
         y_feature_name=y_feature_name
     )
+    # dot_data = tree.export_graphviz(
+    #     tree_classifier,
+    #     out_file=None,
+    #     feature_names=x_train_rows.columns,
+    #     class_names=['Счастливая', 'Среднее счастливая', 'Наименее сачстливая'],
+    #     filled=True
+    # )
+    # g = graphviz.Source(dot_data)
+    # pydot_graph = pydotplus.graph_from_dot_data(dot_data)
+    # pydot_graph.write_pdf('reports/tree.pdf')
     return report
 
 
